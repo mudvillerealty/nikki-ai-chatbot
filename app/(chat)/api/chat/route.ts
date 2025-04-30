@@ -42,10 +42,10 @@ export async function POST(request: Request) {
   try {
     const { id, message, selectedChatModel } = requestBody;
 
-    const session = await auth();
+    const session = (await auth()) ?? { user: null };
 
 // TEMP FIX: Allow guest users to test functionality
-if (!session?.user) {
+if (!session.user) {
   session.user = {
     id: 'guest',
     type: 'guest',
