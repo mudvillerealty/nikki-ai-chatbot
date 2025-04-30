@@ -53,7 +53,7 @@ if (!session?.user) {
   };
 }
 
-const userType: UserType = session.user?.type ?? 'guest';
+const userType: UserType = session.user.type;
 
     
 
