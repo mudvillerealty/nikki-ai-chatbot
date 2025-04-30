@@ -43,15 +43,19 @@ export async function POST(request: Request) {
     const { id, message, selectedChatModel } = requestBody;
 
     // Auth fallback
-    const session = (await auth()) ?? { user: null };
+    let session = await auth();
 
-    if (!session.user) {
-      session.user = {
-        id: 'guest',
-        type: 'guest',
-        email: 'guest@example.com',
-      };
-    }
+if (!session || !session.user) {
+  session = {
+    user: {
+      id: 'guest',
+      type: 'guest',
+      email: 'guest@example.com',
+      name: 'Guest',
+    },
+    expires: '',
+  };
+}
 
     const userType: UserType = session.user.type;
 
