@@ -11,3 +11,20 @@ export const authConfig = {
   ],
   callbacks: {},
 } satisfies NextAuthConfig;
+callbacks: {
+  async session({ session, token }) {
+    if (token && session.user) {
+      session.user.id = token.id;
+      session.user.type = token.type || 'guest';
+    }
+    return session;
+  },
+  async jwt({ token, user }) {
+    if (user) {
+      token.id = user.id;
+      token.type = user.type || 'guest';
+    }
+    return token;
+  }
+},
+process.env.NEXTAUTH_SECRET if not already set in auth.ts.
