@@ -1,31 +1,58 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useRef } from 'react';
 
-export function useScrollToBottom<T extends HTMLElement>(): [
-  RefObject<T>,
-  RefObject<T>,
-] {
+export function useScrollToBottom<T extends HTMLElement>() {
   const containerRef = useRef<T>(null);
   const endRef = useRef<T>(null);
+  const shouldScrollRef = useRef(true);
+
+  const scrollToBottom = () => {
+    if (endRef.current) {
+      endRef.current.scrollIntoView({
+        behavior: 'instant',
+        block: 'end',
+      });
+    }
+  };
 
   useEffect(() => {
     const container = containerRef.current;
     const end = endRef.current;
 
     if (container && end) {
-      const observer = new MutationObserver(() => {
-        end.scrollIntoView({ behavior: 'instant', block: 'end' });
+      const intersectionObserver = new IntersectionObserver(
+        ([entry]) => {
+          shouldScrollRef.current = entry.isIntersecting;
+        },
+        { threshold: 0 },
+      );
+
+      intersectionObserver.observe(end);
+
+      const mutationObserver = new MutationObserver(() => {
+        if (shouldScrollRef.current) {
+          scrollToBottom();
+        }
       });
 
-      observer.observe(container, {
+      mutationObserver.observe(container, {
         childList: true,
         subtree: true,
         attributes: true,
         characterData: true,
       });
 
-      return () => observer.disconnect();
+      return () => {
+        intersectionObserver.disconnect();
+        mutationObserver.disconnect();
+      };
     }
   }, []);
 
-  return [containerRef, endRef];
+  return {
+    containerRef,
+    endRef,
+    scrollToBottom,
+  };
 }
+
+export type UseScrollToBottomReturn = ReturnType<typeof useScrollToBottom>;
