@@ -12,7 +12,10 @@ const runMigrate = async () => {
     throw new Error('POSTGRES_URL is not defined');
   }
 
-  const connection = postgres(process.env.POSTGRES_URL, { max: 1 });
+  const connection = postgres('postgresql://neondb_owner:yourPasswordHere@ep-patient-bonus-a4rbfdl6-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require', {
+  ssl: 'require',
+  max: 1,
+});
   const db = drizzle(connection);
 
   console.log('⏳ Running migrations...');
