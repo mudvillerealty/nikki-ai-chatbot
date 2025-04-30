@@ -3,14 +3,20 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 
-config({
-  path: '.env.local',
-});
+// Load .env.local file
+config({ path: '.env.local' });
 
 const runMigrate = async () => {
-  const connection = postgres('postgresql://neondb_owner:npg_zI3GcBO1iFfb@ep-patient-bonus-a4rbfdl6-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require', {
+  const databaseUrl = process.env.POSTGRES_URL;
+
+  if (!databaseUrl) {
+    console.error('❌ POSTGRES_URL is not defined in .env.local');
+    process.exit(1);
+  }
+
+  const connection = postgres(databaseUrl, {
     ssl: 'require',
-    max: 1,
+    max: 1, // Only allow one connection during migration
   });
 
   const db = drizzle(connection);
@@ -22,11 +28,11 @@ const runMigrate = async () => {
     await migrate(db, { migrationsFolder: './lib/db/migrations' });
     const end = Date.now();
 
-    console.log('✅ Migrations completed in', end - start, 'ms');
+    console.log(`✅ Migrations completed in ${end - start}ms`);
     process.exit(0);
-  } catch (err) {
+  } catch (error) {
     console.error('❌ Migration failed');
-    console.error(err);
+    console.error(error);
     process.exit(1);
   }
 };
