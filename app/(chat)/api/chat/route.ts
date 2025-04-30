@@ -45,6 +45,8 @@ export async function POST(request: Request) {
     // Auth fallback
     let session = await auth();
 
+// console.log('Session:', session);
+    
 if (!session || !session.user) {
   session = {
     user: {
