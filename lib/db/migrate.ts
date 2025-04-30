@@ -8,28 +8,27 @@ config({
 });
 
 const runMigrate = async () => {
-  if (!process.env.POSTGRES_URL) {
-    throw new Error('POSTGRES_URL is not defined');
-  }
+  const connection = postgres('postgresql://neondb_owner:npg_zI3GcBO1iFfb@ep-patient-bonus-a4rbfdl6-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require', {
+    ssl: 'require',
+    max: 1,
+  });
 
-  const connection = postgres('postgresql://neondb_owner:yourPasswordHere@ep-patient-bonus-a4rbfdl6-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require', {
-  ssl: 'require',
-  max: 1,
-});
   const db = drizzle(connection);
 
   console.log('⏳ Running migrations...');
 
-  const start = Date.now();
-  await migrate(db, { migrationsFolder: './lib/db/migrations' });
-  const end = Date.now();
+  try {
+    const start = Date.now();
+    await migrate(db, { migrationsFolder: './lib/db/migrations' });
+    const end = Date.now();
 
-  console.log('✅ Migrations completed in', end - start, 'ms');
-  process.exit(0);
+    console.log('✅ Migrations completed in', end - start, 'ms');
+    process.exit(0);
+  } catch (err) {
+    console.error('❌ Migration failed');
+    console.error(err);
+    process.exit(1);
+  }
 };
 
-runMigrate().catch((err) => {
-  console.error('❌ Migration failed');
-  console.error(err);
-  process.exit(1);
-});
+runMigrate();
