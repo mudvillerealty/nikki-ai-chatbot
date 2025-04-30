@@ -55,7 +55,7 @@ if (!session?.user) {
 
 const userType: UserType = session.user?.type ?? 'guest';
 
-    const userType: UserType = session.user.type;
+    
 
     const messageCount = await getMessageCountByUserId({
       id: session.user.id,
