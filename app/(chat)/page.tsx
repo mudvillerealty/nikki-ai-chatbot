@@ -4,17 +4,17 @@ import { redirect } from 'next/navigation';
 import { Chat } from '@/components/chat';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { generateUUID } from '@/lib/utils';
-import { DataStreamHandler } from '@/components/data-stream-handler';
-import { auth } from './(auth)/auth'; // ✅ Make sure this matches your file path
+import { DataStreamHandler } from '@/components/datastream-handler';
+import { auth } from './(auth)/auth';
 
 export default async function Page() {
   const session = await auth();
 
   const id = generateUUID();
   const cookieStore = cookies();
-  const modelIdFromCookie = cookieStore.get('chat-model');
+  const modelIdFromCookie = cookieStore.get('chat-model-id');
 
-  // Safe fallback: even if session is null, we keep rendering the chat
+  // Fallback — show chat even if no session
   const showAsGuest = !session;
 
   return (
@@ -23,12 +23,14 @@ export default async function Page() {
         key={id}
         id={id}
         initialMessages={[]}
-        selectedChatModel={modelIdFromCookie?.value || DEFAULT_CHAT_MODEL}
-        selectedVisibilityType="private"
+        selectedChatModel={modelIdFromCookie?.value || DEFAULT_CHAT_MODEL.id}
+        selectedVisibility="private"
         isReadonly={false}
-        session={session}
+        showAsGuest={showAsGuest}
+        showBackButton={false}
+        showShareButton={false}
       />
-      <DataStreamHandler id={id} />
+      <DataStreamHandler chatId={id} />
     </>
   );
 }
