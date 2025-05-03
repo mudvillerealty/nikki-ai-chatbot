@@ -1,26 +1,21 @@
-'use client';
-
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+
 import { Chat } from '@/components/chat';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { generateUUID } from '@/lib/utils';
 import { DataStreamHandler } from '@/components/data-stream-handler';
-import { auth } from './(auth)/auth'; // ✅ CORRECT path
-import { redirect } from 'next/navigation';
+import { auth } from './(auth)/auth'; // ✅ Make sure this matches your file path
 
 export default async function Page() {
   const session = await auth();
 
-  if (!session || !session.user) {
-    redirect('/api/auth/guest');
-  }
-
   const id = generateUUID();
-
   const cookieStore = cookies();
   const modelIdFromCookie = cookieStore.get('chat-model');
 
-  const selectedModel = modelIdFromCookie?.value || DEFAULT_CHAT_MODEL;
+  // Safe fallback: even if session is null, we keep rendering the chat
+  const showAsGuest = !session;
 
   return (
     <>
@@ -28,7 +23,7 @@ export default async function Page() {
         key={id}
         id={id}
         initialMessages={[]}
-        selectedChatModel={selectedModel}
+        selectedChatModel={modelIdFromCookie?.value || DEFAULT_CHAT_MODEL}
         selectedVisibilityType="private"
         isReadonly={false}
         session={session}
